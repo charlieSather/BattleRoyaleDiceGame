@@ -1,68 +1,90 @@
-"use strict"
+"use strict";
 
-const numPlayers = 10;
+const totalPlayers = 10;
 var players = [];
-var rounds = 6;
-var currentRound = 1;
-var diceSet = [4,6,8,10,12,20]
+var totalRounds = 6;
+var currentRound = 0;
+var diceSet = [4, 6, 8, 10, 12, 20];
 
-function setupPlayers(){
-    for(let i = 1; i <= numPlayers; i++){
+function setupPlayers(numPlayers) {
+    for (let i = 1; i <= numPlayers; i++) {
         players.push({
-            Name: "Player " + i , 
-            Rolls:[],
+            Name: "Player " + i,
+            Rolls: [],
             RoundScore: 0
         });
     }
 }
 
-setupPlayers();
+setupPlayers(totalPlayers);
 
-// var i = () => {
-//         for(let i = 0; i < 100; i ++){
-//             console.log(getRandom(4));
-//     }
-// }
-
-// i();
-
-
-function rollDiceSet(){
+function rollDiceSet(set) {
     let rolls = [];
-    diceSet.forEach(function (value,index, array){
-        let roll = rollDice(value);
-        rolls.push(roll);
+
+    set.forEach((dice) => {
+        rolls.push(rollDice(dice));
     });
+
     return rolls;
 }
 
-function getSum(rolls){
-    return rolls.reduce(function(total, value){
-        return total + value;
-    },0);
-}
+var getSum = (rolls) => rolls.reduce((total, value) => total + value, 0);
 
-function rollDice(numSides){
-   return getRandom(numSides)
-}
+var rollDice = (dice) => getRandom(dice);
 
-function getRandom(max){
-    return Math.floor(Math.random() * max) + 1; 
-}
+var getRandom = (max) => Math.floor(Math.random() * max) + 1;
 
-function playRound(){
-    players.forEach(function(value,index,array){
-        value.Rolls = rollDiceSet(value);
+function playRound() {
+    players.forEach((value) => {
+        value.Rolls = rollDiceSet(diceSet);
         value.RoundScore = getSum(value.Rolls);
     });
 }
+
+function gameRound() {
+    round++;
+    if(round < 6){
+        playRound();
+    }
+}
+
+function removeLowestOne(array){
+    let minIndex = 0;
+
+    let min = array.reduce((min, value, index ) => {
+        if(value.RoundScore < min){
+            minIndex = index;
+            return value.RoundScore;
+        }
+        else{
+            return min
+        }
+
+    }, array[0].RoundScore);  
+    array.splice(minIndex, 1);
+}
+
+function removeLowestTwo(array){
+    removeLowestOne(array);
+    removeLowestOne(array);
+}
+
+function diceShootOut() {
+    
+}
+
+
 playRound();
 console.log(players);
+// players.forEach(p => console.log(getSum(p.Rolls)));
 
-function roundWinner(players){
+
+
+removeLowestTwo(players);
+console.log(players);
+
+
+function roundWinner(players) {
 
 }
 
-function diceShootOut(){
-
-}
