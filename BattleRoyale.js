@@ -6,17 +6,24 @@ var totalRounds = 6;
 var currentRound = 0;
 var diceSet = [4, 6, 8, 10, 12, 20];
 
-function setupPlayers(numPlayers) {
-    for (let i = 1; i <= numPlayers; i++) {
+function setupPlayers() {
+    for (let i = 1; i <= totalPlayers; i++) {
         players.push({
             Name: "Player " + i,
             Rolls: [],
-            RoundScore: 0
+            RoundScore: 0,
+            ToString: function() {
+                var str = this.Name;
+                str += "    Rolls: { ";
+                this.Rolls.forEach(x => str += x + " ");
+                str += "}     ";
+                str += "Score: ";
+                str += this.RoundScore;
+                return str;
+            }
         });
     }
 }
-
-setupPlayers(totalPlayers);
 
 function rollDiceSet(set) {
     let rolls = [];
@@ -34,18 +41,12 @@ var rollDice = (dice) => getRandom(dice);
 
 var getRandom = (max) => Math.floor(Math.random() * max) + 1;
 
+
 function playRound() {
     players.forEach((value) => {
         value.Rolls = rollDiceSet(diceSet);
         value.RoundScore = getSum(value.Rolls);
     });
-}
-
-function gameRound() {
-    round++;
-    if(round < 6){
-        playRound();
-    }
 }
 
 function removeLowestOne(array){
@@ -68,14 +69,17 @@ function removeLowestTwo(array){
     removeLowestOne(array);
     removeLowestOne(array);
 }
+function appendResults(){
+    document.getElementById("Board").innerHTML = "";
+    players.forEach(x =>{
+        console.log(x.ToString())
+        var p = document.createTextNode(x.ToString());
+        var b = document.createElement("br"); 
+        document.getElementById("Board").appendChild(p);
+        document.getElementById("Board").appendChild(b);
 
-// function rollTwenties(dice){
-//     let rolls = [];
-//     for(let i = 0; i < 4; i++){
-//         rolls.push(rollDice());
-//     }
-//     return rolls;
-// }
+    })
+}
 
 
 var diceShootOut = () => players.forEach( p => {
@@ -83,28 +87,31 @@ var diceShootOut = () => players.forEach( p => {
     p.RoundScore = p.Rolls[rollDice(4) - 1];
 });
 
-diceShootOut();
-console.log(players);
+function gameRound() {
+    currentRound++;
+    if(currentRound < 4){
+        playRound();
+        console.log(players);
+        removeLowestTwo(players);
+        appendResults();
+    }
+    else if(currentRound < 6){
+        playRound();
+        console.log(players);
+        removeLowestOne(players);
+        appendResults();
+    }
+    else{
+        diceShootOut();
+        console.log(players);
+        removeLowestOne(players);
+        appendResults();
+        Winner();
+    }
+}
 
-// function diceShootOut() {
-//     players.forEach( p => {
-//         p.RoundSco
-//     })
-
-// }
-
-
-// playRound();
-// console.log(players);
-// players.forEach(p => console.log(getSum(p.Rolls)));
-
-
-
-// removeLowestTwo(players);
-// console.log(players);
-
-
-function roundWinner(players) {
-
+function Winner() {
+    
+    alert(players[0].Name + " wins!\n" + "score: " + players[0].RoundScore );
 }
 
