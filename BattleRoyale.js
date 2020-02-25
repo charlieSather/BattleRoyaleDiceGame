@@ -59,8 +59,8 @@ function removeLowestOne(array){
         else{
             return min
         }
+    }, array[0].RoundScore); 
 
-    }, array[0].RoundScore);  
     array.splice(minIndex, 1);
 }
 
@@ -69,19 +69,39 @@ function removeLowestTwo(array){
     removeLowestOne(array);
 }
 
-function diceShootOut() {
-    
-}
+// function rollTwenties(dice){
+//     let rolls = [];
+//     for(let i = 0; i < 4; i++){
+//         rolls.push(rollDice());
+//     }
+//     return rolls;
+// }
 
 
-playRound();
+var diceShootOut = () => players.forEach( p => {
+    p.Rolls = rollDiceSet([20,20,20,20]);
+    p.RoundScore = p.Rolls[rollDice(4) - 1];
+});
+
+diceShootOut();
 console.log(players);
+
+// function diceShootOut() {
+//     players.forEach( p => {
+//         p.RoundSco
+//     })
+
+// }
+
+
+// playRound();
+// console.log(players);
 // players.forEach(p => console.log(getSum(p.Rolls)));
 
 
 
-removeLowestTwo(players);
-console.log(players);
+// removeLowestTwo(players);
+// console.log(players);
 
 
 function roundWinner(players) {
