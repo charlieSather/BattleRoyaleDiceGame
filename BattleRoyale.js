@@ -4,37 +4,43 @@ const numPlayers = 10;
 var players = [];
 var rounds = 6;
 var currentRound = 1;
-var dice = [4,6,8,10,12,20]
+var diceSet = [4,6,8,10,12,20]
 
 function setupPlayers(){
     for(let i = 1; i <= numPlayers; i++){
         players.push({
             Name: "Player " + i , 
+            Rolls:[],
             RoundScore: 0
         });
     }
 }
 
 setupPlayers();
-console.log(players);
 
-var i = () => {
-        for(let i = 0; i < 100; i ++){
-            console.log(getRandom(4));
-    }
+// var i = () => {
+//         for(let i = 0; i < 100; i ++){
+//             console.log(getRandom(4));
+//     }
+// }
+
+// i();
+
+
+function rollDiceSet(){
+    let rolls = [];
+    diceSet.forEach(function (value,index, array){
+        let roll = rollDice(value);
+        rolls.push(roll);
+    });
+    return rolls;
 }
 
-i();
-
-
-function rollDiceSet(player){
-    let sum = 0;
-    player
-    players.forEach(function (value,index, array){
-        sum += rollDice()
-    })
+function getSum(rolls){
+    return rolls.reduce(function(total, value){
+        return total + value;
+    },0);
 }
-
 
 function rollDice(numSides){
    return getRandom(numSides)
@@ -45,6 +51,15 @@ function getRandom(max){
 }
 
 function playRound(){
+    players.forEach(function(value,index,array){
+        value.Rolls = rollDiceSet(value);
+        value.RoundScore = getSum(value.Rolls);
+    });
+}
+playRound();
+console.log(players);
+
+function roundWinner(players){
 
 }
 
