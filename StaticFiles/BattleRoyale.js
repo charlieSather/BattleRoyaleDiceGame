@@ -7,10 +7,9 @@ var currentRound = 0;
 
 /* Dice sets */
 var diceSet = [4, 6, 8, 10, 12, 20];
-var shootoutSet = [20, 20, 20, 20];
-var finalDice = 4;
+var shootoutSet = [20, 20, 20, 20, 4];
 
-/* Dice sets */
+/* Dice rounds */
 var prelimRounds = 2;
 var quarterFinalRounds =1;
 
@@ -20,6 +19,7 @@ function setupGame(){
     document.getElementById("greeting").hidden = true;
     document.getElementById("play-btn").hidden = false;
     document.getElementById("dataHolder").hidden = false;
+    displayRound();
     appendWinners();
 }
 
@@ -41,6 +41,33 @@ function setupPlayers() {
         });
     }
 }
+
+function buildTableHtmlString(players){
+    var str = "<table class='table table-hover table-dark'>";
+    str += "<thead><tr><th>Name</th><th>Rolls</th><th>Round Score</th></tr></thead>";
+    
+    str += "<tbody>"
+
+    for(let i = 0; i < players.length; i++){
+        str += "<tr>";
+        str += "<td>" + players[i].Name + "</td>";
+        if(players[i].Rolls.length > 1){
+            str += "<td>" + players[i].Rolls.reduce((x,y) => x + ", " + y, "").substring(1) + "</td>";
+        }
+        else{
+            str += "<td>None</td>";
+        }
+
+        str += "<td>" + players[i].RoundScore + "</td>";
+        str += "</tr>";
+    }
+    str += "</tbody>";
+    
+    str += "</table>";
+    return str;
+}
+
+
 
 function rollDiceSet(set) {
     let rolls = [];
@@ -90,43 +117,39 @@ function removePlayers(array, numPlayers){
     }
 }
 
-// function removeLowestTwo(array){
-//     let indexOne = getLowestIndex(array);
-//     let indexTwo = getLowestIndex(array);
-// }
-
 function appendWinners(){
-    document.getElementById("Board").innerHTML = "";
-    players.forEach(x =>{
-        console.log(x.ToString())
-        var p = document.createElement("p");
-        p.innerText = x.ToString();
-        document.getElementById("Board").appendChild(p);
-    });
+    document.getElementById("Board").innerHTML = buildTableHtmlString(players);
+    // players.forEach(x =>{
+    //     console.log(x.ToString())
+    //     var p = document.createElement("p");
+    //     p.innerText = x.ToString();
+    //     document.getElementById("Board").appendChild(p);
+    // });
 }
 
 function appendLosers(){
-    document.getElementById("eliminatedPlayers").innerHTML = "";
-    eliminatedPlayers.forEach(x =>{
-        console.log(x.ToString())
-        var p = document.createElement("p");
-        p.innerText = x.ToString();
-        document.getElementById("eliminatedPlayers").appendChild(p);
-    });
+    document.getElementById("eliminatedPlayers").innerHTML = buildTableHtmlString(eliminatedPlayers);
+    // eliminatedPlayers.forEach(x =>{
+    //     console.log(x.ToString())
+    //     var p = document.createElement("p");
+    //     p.innerText = x.ToString();
+    //     document.getElementById("eliminatedPlayers").appendChild(p);
+    // });
 
 }
 
 var diceShootOut = () => players.forEach( p => {
     p.Rolls = rollDiceSet(shootoutSet);
-    p.RoundScore = p.Rolls[rollDice(finalDice) - 1];
+    let finalRoll = p.Rolls[p.Rolls.length - 1];
+    p.RoundScore = p.Rolls[finalRoll - 1];
 });
 
 function displayRound(){
-    currentRound++;
     document.getElementById("round-box").innerHTML = "Round " + currentRound;
 }
 
 function gameRound() {
+    currentRound++;
     displayRound();
     if(players.length > 4){
         playRound();
