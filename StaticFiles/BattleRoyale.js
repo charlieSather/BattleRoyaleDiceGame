@@ -10,8 +10,8 @@ var diceSet = [4, 6, 8, 10, 12, 20];
 var shootoutSet = [20, 20, 20, 20, 4];
 
 /* Dice rounds */
-var prelimRounds = 2;
-var quarterFinalRounds =1;
+var numPlayersRemoved = 2;
+var quarterFinalRounds = 1;
 
 function setupGame(){
     setupPlayers();
@@ -19,8 +19,9 @@ function setupGame(){
     document.getElementById("greeting").hidden = true;
     document.getElementById("play-btn").hidden = false;
     document.getElementById("dataHolder").hidden = false;
+    document.getElementById("elimPlayers").hidden = true;
     displayRound();
-    appendWinners();
+    appendPlayers();
 }
 
 function setupPlayers() {
@@ -67,8 +68,6 @@ function buildTableHtmlString(players){
     return str;
 }
 
-
-
 function rollDiceSet(set) {
     let rolls = [];
 
@@ -83,66 +82,54 @@ var getSum = (rolls) => rolls.reduce((total, value) => total + value, 0);
 
 var rollDice = (dice) => getRandom(dice);
 
-var getRandom = (max) => Math.floor(Math.random() * max) + 1;
+var getRandom = x => Math.floor(Math.random() * x) + 1;
 
-function playRound() {
+var getMinIndex = (arr, min) => arr.findIndex(x => x.RoundScore == min);
+
+var getMin = arr => arr.reduce((min,value) => value.RoundScore < min ? value.RoundScore : min, arr[0].RoundScore);
+
+var getNumberOfDupes = (arr,dupe) => arr.reduce((counter,value) => value.RoundScore == dupe ? ++counter : counter , 0);
+
+function rollRound(){
     players.forEach((value) => {
         value.Rolls = rollDiceSet(diceSet);
         value.RoundScore = getSum(value.Rolls);
     });
 }
 
-function getLowestIndex(array){
-    let minIndex = 0;
-
-    let min = array.reduce((min, value, index ) => {
-        if(value.RoundScore < min){
-            minIndex = index;
-            return value.RoundScore;
-        }
-        else{
-            return min
-        }
-    }, array[0].RoundScore);
-    
-    return minIndex;
-    // array.splice(minIndex, 1);
+function displayReroll(){
+    document.getElementById("elimPlayers").hidden = true;
+    document.getElementById("round-box").innerHTML += "<br> Draw! Roll again.";
+    appendPlayers();
 }
+
+
 function removePlayers(array, numPlayers){
     eliminatedPlayers = [];
     for(let i = 0; i < numPlayers; i++){
-        let minIndex = getLowestIndex(array);
+        let min = getMin(array);
+        let minIndex = getMinIndex(array,min);
         eliminatedPlayers.push(array[minIndex]);
         array.splice(minIndex, 1);
     }
 }
 
-function appendWinners(){
-    document.getElementById("Board").innerHTML = buildTableHtmlString(players);
-    // players.forEach(x =>{
-    //     console.log(x.ToString())
-    //     var p = document.createElement("p");
-    //     p.innerText = x.ToString();
-    //     document.getElementById("Board").appendChild(p);
-    // });
+function appendPlayers(){
+    document.getElementById("Board").innerHTML = buildTableHtmlString(players); 
 }
 
 function appendLosers(){
     document.getElementById("eliminatedPlayers").innerHTML = buildTableHtmlString(eliminatedPlayers);
-    // eliminatedPlayers.forEach(x =>{
-    //     console.log(x.ToString())
-    //     var p = document.createElement("p");
-    //     p.innerText = x.ToString();
-    //     document.getElementById("eliminatedPlayers").appendChild(p);
-    // });
-
 }
 
-var diceShootOut = () => players.forEach( p => {
-    p.Rolls = rollDiceSet(shootoutSet);
-    let finalRoll = p.Rolls[p.Rolls.length - 1];
-    p.RoundScore = p.Rolls[finalRoll - 1];
-});
+
+var rollDiceShootOut = () => {
+    players.forEach( p => {
+        p.Rolls = rollDiceSet(shootoutSet);
+        let finalRoll = p.Rolls[p.Rolls.length - 1];
+        p.RoundScore = p.Rolls[finalRoll - 1];
+    });
+}
 
 function displayRound(){
     document.getElementById("round-box").innerHTML = "Round " + currentRound;
@@ -151,26 +138,36 @@ function displayRound(){
 function gameRound() {
     currentRound++;
     displayRound();
+    if(document.getElementById("elimPlayers").hidden == true){
+        document.getElementById("elimPlayers").hidden = false;
+    }
+
     if(players.length > 4){
-        playRound();
+        rollRound();
         console.log(players);
-        removePlayers(players, 2);
-        appendWinners();
-        appendLosers();
+        determineRound(numPlayersRemoved);
     }
     else if(players.length > 2 && players.length <= 4){
-        playRound();
+        rollRound();
         console.log(players);
-        removePlayers(players, 1);
-        appendWinners();
-        appendLosers();
+        determineRound(1);
     }
     else if(players.length > 0 && players.length <= 2){
-        diceShootOut();
-        console.log(players);
-        removePlayers(players, 1);
-        appendWinners();
+        rollDiceShootOut();
+        determineRound(1);
+    }
+}
+
+function determineRound(numRemoved){
+    if(getNumberOfDupes(players, getMin(players)) > numRemoved){
+        displayReroll();
+    }
+    else{
+        removePlayers(players, numRemoved);
+        appendPlayers();
         appendLosers();
+    }
+    if(players.length == 1){
         Winner();
     }
 }
